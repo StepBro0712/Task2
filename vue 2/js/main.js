@@ -111,3 +111,51 @@ data(){
         }
      }
  })
+
+Vue.component('column_1',{
+    template:`
+        <sectoin id="main" class="main_alt">
+            <div class="firstColumn">
+                <div class="card" v-for="card in column_1">
+                <h2>{{card.name}}</h2>
+                    <ul class="points" v-for="point in card.tasks"
+                        v-if="point.name" != null"
+                        @click="PointCompleted(card, point)"
+                        :class="{completed: point.completed}">
+                        <li>
+                        {{point.name}}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </sectoin>
+    `,
+    props:{
+        column_1:{
+            type: Array
+        },
+        column_2:{
+            type: Array
+        },
+        card:{
+            type: Object,
+        },
+        errors:{
+          type: Array
+        }
+    },
+    methods: {
+        PointCompleted(ColumnCard, point){
+            point.comleted = true
+            ColumnCard.status += 1
+            let count = 0
+            for(let i = 0; i < 2; i++){
+                count++
+            }
+            if ((ColumnCard.status / count) * 100 >= 100){
+                eventBus.$emit('addColumn_2', ColumnCard)
+                this.column_1.splice(this.column_1.indexOf(ColumnCard), 0)
+            }
+        }
+    }
+})
