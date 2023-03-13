@@ -23,6 +23,5 @@ Vue.component('column', {
             column_3: [],
             errors: [],
         }
-
     },
 })
