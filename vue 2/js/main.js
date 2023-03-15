@@ -23,13 +23,14 @@ Vue.component('notes',{
     },
     template:`
         <div class="notes">
-            <h2 class="error" v-for="error in errors">{{error}}</h2>
+            
             <newNotes></newNotes>
+            <h2 class="error" v-for="error in errors">{{error}}</h2>
             <div class="note-wrap">
                 <div class="note">
                  <h1> Новые задачи</h1>
                     <ul>
-                        <li class="notes-li" v-for="note in colum_1"><p class="note-name">{{note.name}}</p>
+                        <li class="notes-li" v-for="note in column_1"><p class="note-name">{{note.name}}</p>
                             <ul>
                                 <li class="tasks" v-for="task in note.tasks" v-if="task.name !== null"">
                                 <p class="p-li" :class="{ textDecoration: task.readiness }">{{task.name}}</p>
@@ -42,7 +43,7 @@ Vue.component('notes',{
                 <div class="note">
                     <h1> Почти всё</h1>
                     <ul>
-                        <li class="notes-li" v-for="note in colum_2"><p class="note-name">{{note.name}}</p>
+                        <li class="notes-li" v-for="note in column_2"><p class="note-name">{{note.name}}</p>
                             <ul>
                                 <li class="tasks-2" v-for="task in note.tasks" v-if="task.name !== null">
                                 <input type="checkbox" class="checkbox" @click="newStatus_2(note, task)" :disabled="task.readiness">
@@ -72,21 +73,21 @@ Vue.component('notes',{
     `,
     data(){
         return{
-            colum_1: [],
-            colum_2: [],
-            colum_3: [],
+            column_1: [],
+            column_2: [],
+            column_3: [],
             errors: [],
             active: 0
         }
     },
     mounted(){
-        this.colum_1 = JSON.parse(localStorage.getItem("colum_1")) || [];
-        this.colum_2 = JSON.parse(localStorage.getItem("colum_2")) || [];
-        this.colum_3 = JSON.parse(localStorage.getItem("colum_3")) || [];
+        this.column_1 = JSON.parse(localStorage.getItem("column_1")) || [];
+        this.column_2 = JSON.parse(localStorage.getItem("column_2")) || [];
+        this.column_3 = JSON.parse(localStorage.getItem("column_3")) || [];
         eventBus.$on('notes-submitted', note => {
             this.errors = []
-            if (this.colum_1.length < 3){
-                this.colum_1.push(note);
+            if (this.column_1.length < 3){
+                this.column_1.push(note);
                 this.saveNote_1();
             } else {
                 this.errors.push('Maximum number of tasks!');
@@ -94,25 +95,25 @@ Vue.component('notes',{
         })
     },
     watch: {
-        colum_1(newValue) {
-            localStorage.setItem("colum_1", JSON.stringify(newValue));
+        column_1(newValue) {
+            localStorage.setItem("column_1", JSON.stringify(newValue));
         },
-        colum_2(newValue) {
-            localStorage.setItem("colum_2", JSON.stringify(newValue));
+        column_2(newValue) {
+            localStorage.setItem("column_2", JSON.stringify(newValue));
         },
-        colum_3(newValue) {
-            localStorage.setItem("colum_3", JSON.stringify(newValue));
+        column_3(newValue) {
+            localStorage.setItem("column_3", JSON.stringify(newValue));
         }
     },
     methods: {
         saveNote_1(){
-            localStorage.setItem('colum_1', JSON.stringify(this.colum_1));
+            localStorage.setItem('column_1', JSON.stringify(this.column_1));
         },
         saveNote_2(){
-            localStorage.setItem('colum_2', JSON.stringify(this.colum_2));
+            localStorage.setItem('column_2', JSON.stringify(this.column_2));
         },
         saveNote_3(){
-            localStorage.setItem('colum_3', JSON.stringify(this.colum_3));
+            localStorage.setItem('column_3', JSON.stringify(this.column_3));
         },
         newStatus_1(note, task) {
             task.readiness = true;
@@ -128,12 +129,12 @@ Vue.component('notes',{
                     note.status++;
                 }
             }
-            if (note.status/count*100 >= 50 && this.colum_2.length < 5) {
-                this.colum_2.push(note)
-                this.colum_1.splice(this.colum_1.indexOf(note), 1)
-            } else if (this.colum_2.length === 5) {
-                if(this.colum_1.length > 0) {
-                    this.colum_1.forEach(item => {
+            if (note.status/count*100 >= 50 && this.column_2.length < 5) {
+                this.column_2.push(note)
+                this.column_1.splice(this.column_1.indexOf(note), 1)
+            } else if (this.column_2.length === 5) {
+                if(this.column_1.length > 0) {
+                    this.column_1.forEach(item => {
                         item.tasks.forEach(item => {
                             item.readiness = true;
                         })
@@ -157,13 +158,13 @@ Vue.component('notes',{
                 }
             }
             if (note.status/count*100 === 100) {
-                this.colum_3.push(note)
-                this.colum_2.splice(this.colum_2.indexOf(note), 1)
+                this.column_3.push(note)
+                this.column_2.splice(this.column_2.indexOf(note), 1)
                 note.date = new Date()
             }
-            if(this.colum_2.length < 5) {
-                if(this.colum_1.length > 0) {
-                    this.colum_1.forEach(item => {
+            if(this.column_2.length < 5) {
+                if(this.column_1.length > 0) {
+                    this.column_1.forEach(item => {
                         item.tasks.forEach(item => {
                             item.readiness = false;
                         })
