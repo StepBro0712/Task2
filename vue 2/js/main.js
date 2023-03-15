@@ -1,261 +1,251 @@
-let eventBus = new Vue()
+let eventBus = new Vue();
 
-Vue.component('column', {
-    // колонки
-    template: `
- 
-        <div class="columns">
-            <newCard></newCard>
-            
-            <p class="head">NOTES</p>
-            
-        <p class="error" v-for="error in errors">{{ error }}</p>
-                <column_1 :column_1="column_1"></column_1>
-                <column_2 :column_2="column_2"></column_2>
-                <column_3 :column_3="column_3"></column_3>
+Vue.component('notes',{
+    props:{
+        note:{
+            name:{
+                type: Text,
+                required: true
+            },
+            tasks:{
+                type: Array,
+                required: true,
+                readiness: {
+                    type: Boolean,
+                    required: true
+                }
+            },
+            status: {
+                type: Number,
+                required: true
+            },
+        },
+    },
+    template:`
+        <div class="notes">
+            <h2 class="error" v-for="error in errors">{{error}}</h2>
+            <newNotes></newNotes>
+            <div class="note-wrap">
+                <div class="note">
+                 <h1> Новые задачи</h1>
+                    <ul>
+                        <li class="notes-li" v-for="note in colum_1"><p class="note-name">{{note.name}}</p>
+                            <ul>
+                                <li class="tasks" v-for="task in note.tasks" v-if="task.name !== null"">
+                                <p class="p-li" :class="{ textDecoration: task.readiness }">{{task.name}}</p>
+                                <input type="checkbox" class="checkbox" @click="newStatus_1(note, task)" :disabled="task.readiness">
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <div class="note">
+                    <h1> Почти всё</h1>
+                    <ul>
+                        <li class="notes-li" v-for="note in colum_2"><p class="note-name">{{note.name}}</p>
+                            <ul>
+                                <li class="tasks-2" v-for="task in note.tasks" v-if="task.name !== null">
+                                <input type="checkbox" class="checkbox" @click="newStatus_2(note, task)" :disabled="task.readiness">
+                                <p class="p-li" :class="{ textDecoration: task.readiness }">{{task.name}}</p>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>  
+                <div class="note">
+                    <h1>Завершённые</h1>
+                    <ul>
+                        <li class="notes-li" v-for="note in colum_3">
+                            <p class="note-name">{{note.name}}</p>
+                            <ul>
+                                <li class="tasks-2" v-for="task in note.tasks" v-if="task.name !== null">
+                                <input type="checkbox" class="checkbox" @click="task.readiness = true" :disabled="task.readiness">
+                                <p class="p-li" :class="{ textDecoration: task.readiness }">{{task.name}}</p>
+                                </li>
+                                <p class="note-data">{{ note.date }}</p>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
     `,
-
-
-
-
-    data() {
-        return {
-            column_1: [],
-            column_2: [],
-            column_3: [],
+    data(){
+        return{
+            colum_1: [],
+            colum_2: [],
+            colum_3: [],
             errors: [],
+            active: 0
         }
-
     },
-    mounted() {
-        eventBus.$on('addColumn_1', ColumnCard => {
-
-            if (this.column_1.length < 3) {
-                this.errors.length = 0
-                this.column_1.push(ColumnCard)
+    mounted(){
+        this.colum_1 = JSON.parse(localStorage.getItem("colum_1")) || [];
+        this.colum_2 = JSON.parse(localStorage.getItem("colum_2")) || [];
+        this.colum_3 = JSON.parse(localStorage.getItem("colum_3")) || [];
+        eventBus.$on('notes-submitted', note => {
+            this.errors = []
+            if (this.colum_1.length < 3){
+                this.colum_1.push(note);
+                this.saveNote_1();
             } else {
-                this.errors.length = 0
-                this.errors.push()
+                this.errors.push('Maximum number of tasks!');
             }
         })
-        eventBus.$on('addColumn_2', ColumnCard => {
-            if (this.column_2.length < 5) {
-                this.errors.length = 0
-                this.column_2.push(ColumnCard)
-                this.column_1.splice(this.column_1.indexOf(ColumnCard), 1)
-            } else {
-                this.errors.length = 0
-                this.errors.push()
+    },
+    watch: {
+        colum_1(newValue) {
+            localStorage.setItem("colum_1", JSON.stringify(newValue));
+        },
+        colum_2(newValue) {
+            localStorage.setItem("colum_2", JSON.stringify(newValue));
+        },
+        colum_3(newValue) {
+            localStorage.setItem("colum_3", JSON.stringify(newValue));
+        }
+    },
+    methods: {
+        saveNote_1(){
+            localStorage.setItem('colum_1', JSON.stringify(this.colum_1));
+        },
+        saveNote_2(){
+            localStorage.setItem('colum_2', JSON.stringify(this.colum_2));
+        },
+        saveNote_3(){
+            localStorage.setItem('colum_3', JSON.stringify(this.colum_3));
+        },
+        newStatus_1(note, task) {
+            task.readiness = true;
+            let count = 0;
+            note.status = 0;
+            for (let i = 0; i < 5; ++i) {
+                if (note.tasks[i].name != null) {
+                    count++;
+                }
             }
-        })
-        eventBus.$on('addColumn_3', ColumnCard => {
-            this.column_3.push(ColumnCard)
-            this.column_2.splice(this.column_2.indexOf(ColumnCard), 1)
-
-        })
-    }
+            for (let i = 0; i < count; ++i) {
+                if (note.tasks[i].readiness === true) {
+                    note.status++;
+                }
+            }
+            if (note.status/count*100 >= 50 && this.colum_2.length < 5) {
+                this.colum_2.push(note)
+                this.colum_1.splice(this.colum_1.indexOf(note), 1)
+            } else if (this.colum_2.length === 5) {
+                if(this.colum_1.length > 0) {
+                    this.colum_1.forEach(item => {
+                        item.tasks.forEach(item => {
+                            item.readiness = true;
+                        })
+                    })
+                }
+            }
+            this.saveNote_2();
+        },
+        newStatus_2(note, task) {
+            task.readiness = true;
+            let count = 0;
+            note.status = 0;
+            for (let i = 0; i < 5; ++i) {
+                if (note.tasks[i].name != null) {
+                    count++;
+                }
+            }
+            for (let i = 0; i < count; ++i) {
+                if (note.tasks[i].readiness === true) {
+                    note.status++;
+                }
+            }
+            if (note.status/count*100 === 100) {
+                this.colum_3.push(note)
+                this.colum_2.splice(this.colum_2.indexOf(note), 1)
+                note.date = new Date()
+            }
+            if(this.colum_2.length < 5) {
+                if(this.colum_1.length > 0) {
+                    this.colum_1.forEach(item => {
+                        item.tasks.forEach(item => {
+                            item.readiness = false;
+                        })
+                    })
+                }
+            }
+            this.saveNote_3();
+        },
+    },
 })
 
-Vue.component('newCard', {
-    template: `
-    <section id="main" class="main-alt">
-    
-        <form class="row" @submit.prevent="Submit">
-        
-        <div class="text">
-            <h1 class="main_text">Your notes</h1>
-        </div>    
-            
-        <div class="form_control">
-                
-            <div class="form_name">
-                <input required type="text" v-model="name" id="name" placeholder="Введите название заметки"/>
-            </div>
-            <input required type="text"  v-model="point_1" placeholder="Первый пункт"/>
-            <input required type="text"  v-model="point_2" placeholder="Второй пункт"/>
-            <input required type="text"  v-model="point_3" placeholder="Третий пункт"/> 
-            <input  type="text"  v-model="point_4"  placeholder="Четвертый пункт"/>
-            <input type="text" v-model="point_5"  placeholder="Пятый пункт"/>
-        </div>
-            <div class="form_control">
-                <button class="send">SEND</button>
-            </div>
-        </form>
-    </section>
-    `,
-    data() {
-        return {
+Vue.component( 'newNotes',{
+    template:`
+            <div class="create-window">
+                <div class="modal-header">
+
+                    <div class="create-body">
+                        <div class="create_form">
+                            <form class="create" @submit.prevent="onSubmit">
+                                <input id="name" v-model="name" type="text" placeholder="Название" required maxlength="20">
+                                <input id="task_1" v-model="task_1" type="text" placeholder="Задача 1 " required maxlength="20">
+                                <input id="task_2" v-model="task_2" type="text" placeholder="Задача 2" required maxlength="20">
+                                <input id="task_3" v-model="task_3" type="text" placeholder="Задача 3" required maxlength="20">
+                                <input id="task_4" v-model="task_4" type="text" placeholder="Задача 4" maxlength="20">
+                                <input id="task_5" v-model="task_5" type="text" placeholder="Задача 5" maxlength="20">
+                                <button type="submit">Создать</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>    
+            </div> 
+        `,
+    data(){
+        return{
             name: null,
-            point_1: null,
-            point_2: null,
-            point_3: null,
-            point_4: null,
-            point_5: null,
-            date: null,
+            task_1: null,
+            task_2: null,
+            task_3: null,
+            task_4: null,
+            task_5: null,
+            errors:[],
+            show: false,
         }
     },
-    methods: {
-
-        Submit() {
-            let card = {
-                name: this.name,
-                points: [
-                    {name: this.point_1, completed: false},
-                    {name: this.point_2, completed: false},
-                    {name: this.point_3, completed: false},
-                    {name: this.point_4, completed: false},
-                    {name: this.point_5, completed: false}
-                ],
-                date: null,
-                status: 0,
-                errors: [],
-            }
-            eventBus.$emit('addColumn_1', card)
-            this.name = null;
-            this.point_1 = null
-            this.point_2 = null
-            this.point_3 = null
-            this.point_4 = null
-            this.point_5 = null
-        }
-    }
-
-})
-
-Vue.component('column_1', {
-    template: `
-        <section id="main" class="main-alt">
-            <div class="column column_one">
-                <div class="card" v-for="card in column_1">
-                <h3>{{ card.name }}</h3>
-                    <ul class="tasks" v-for="task in card.points"
-                        v-if="task.name != null"
-                        @click="TaskCompleted(card, task)"
-                        :class="{completed: task.completed}">
-                        <li>
-                        {{ task.name }}
-                        </li>
-                    </ul>
-                    
-                </div>
-            </div>
-        </section>
-    `,
-    props: {
-        column_1: {
-            type: Array,
-        },
-        column_2: {
-            type: Array,
-        },
-        card: {
-            type: Object,
-        },
-        errors: {
-            type: Array,
-        },
-    },
-    methods: {
-        TaskCompleted(ColumnCard, task) {
-            if (task.completed === false){
-                task.completed = true
-                ColumnCard.status += 1
-            }
-
-            let count = 0
-            for (let i = 0; i < 5; ++i) {
-                if (ColumnCard.points[i].name !== null) {
-                    count++;
+    methods:{
+        onSubmit() {
+            if (this.name && this.task_1 && this.task_2 && this.task_3){
+                let note = {
+                    name: this.name,
+                    tasks: [
+                        {name: this.task_1, readiness: false},
+                        {name: this.task_2, readiness: false},
+                        {name: this.task_3, readiness: false},
+                        {name: this.task_4, readiness: false},
+                        {name: this.task_5, readiness: false},
+                    ],
+                    data: null,
+                    status: 0,
                 }
-            }
-
-            if ((ColumnCard.status / count) * 100 >= 50) {
-                eventBus.$emit('addColumn_2', ColumnCard)
-                this.column_1.splice(this.column_1.indexOf(ColumnCard), 0)
+                eventBus.$emit('notes-submitted', note);
+                this.name = null;
+                this.task_1 = null;
+                this.task_2 = null;
+                this.task_3 = null;
+                this.task_4 = null;
+                this.task_5 = null;
+            }else {
+                if(!this.name) this.errors.push("Name required.")
+                if(!this.task_1) this.errors.push("task_1 required.")
+                if(!this.task_2) this.errors.push("task_2 required.")
+                if(!this.task_3) this.errors.push("task_3 required.")
             }
         },
-    },
-})
-
-Vue.component('column_2', {
-    template: `
-        <section id="main" class="main-alt">
-            <div class="column column_two">
-                <div class="card" v-for="card in column_2">
-                <h3>{{ card.name }}</h3>
-                    <ul class="tasks" v-for="task in card.points"
-                        v-if="task.name != null"
-                        @click="TaskCompleted(card, task)"
-                        :class="{completed: task.completed}">
-                        <li >
-                        {{ task.name }}
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-    `,
-    props: {
-        column_2: {
-            type: Array,
-        },
-        card: {
-            type: Object,
-        },
-    },
-    methods: {
-        TTaskCompleted(ColumnCard, task) {
-            if (task.completed === false){
-                task.completed = true
-                ColumnCard.status += 1
-            }
-            let count = 0
-            for (let i = 0; i < 5; ++i) {
-                if (ColumnCard.points[i].name !== null) {
-                    count++;
-                }
-            }
-            if (( ColumnCard.status / count) * 100 >= 100 ) {
-                eventBus.$emit('addColumn_3', ColumnCard)
-                ColumnCard.date = new Date().toLocaleString()
-            }
+        closeModal: function () {
+            this.show = false
         }
     }
 })
-
-Vue.component('column_3', {
-    template: `
-        <section id="main" class="main-alt">
-            <div class="column column_three">
-                <div class="card" v-for="card in column_3">
-                <h3>{{ card.name }}</h3>
-                    <ul class="tasks" v-for="task in card.points"
-                        v-if="task.name != null"
-                        @click="TaskCompleted(card, task)"
-                        :class="{completed: task.completed}">
-                        <li>
-                        {{ task.name }}
-                        </li>
-                    </ul><br>
-                    
-                        <p>{{ card.date }}</p>
-                </div>
-            </div>
-        </section>
-    `,
-    props: {
-        column_3: {
-            type: Array,
-        },
-        card: {
-            type: Object,
-        },
-    },
-})
-
-
 
 let app = new Vue({
     el: '#app',
+    data: {
+        name: 'Notes',
+    }
 })
