@@ -107,6 +107,8 @@ ul{
 .note-name{
     margin: 0 auto 20px auto;
     padding: 10px 0 10px 0;
+    font-size: 25px;
+    font-weight: bold;
 }
 .note-data{
 

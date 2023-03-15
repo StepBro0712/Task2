@@ -28,7 +28,7 @@ Vue.component('notes',{
             <h2 class="error" v-for="error in errors">{{error}}</h2>
             <div class="note-wrap">
                 <div class="note">
-                 <h1> Новые задачи</h1>
+                 <h1>New task</h1>
                     <ul>
                         <li class="notes-li" v-for="note in column_1"><p class="note-name">{{note.name}}</p>
                             <ul>
@@ -41,7 +41,7 @@ Vue.component('notes',{
                     </ul>
                 </div>
                 <div class="note">
-                    <h1> Почти всё</h1>
+                    <h1>Almost all</h1>
                     <ul>
                         <li class="notes-li" v-for="note in column_2"><p class="note-name">{{note.name}}</p>
                             <ul>
@@ -54,9 +54,9 @@ Vue.component('notes',{
                     </ul>
                 </div>  
                 <div class="note">
-                    <h1>Завершённые</h1>
+                    <h1>Completed</h1>
                     <ul>
-                        <li class="notes-li" v-for="note in colum_3">
+                        <li class="notes-li" v-for="note in column_3">
                             <p class="note-name">{{note.name}}</p>
                             <ul>
                                 <li class="tasks-2" v-for="task in note.tasks" v-if="task.name !== null">
@@ -183,13 +183,13 @@ Vue.component( 'newNotes',{
                     <div class="create-body">
                         <div class="create_form">
                             <form class="create" @submit.prevent="onSubmit">
-                                <input id="name" v-model="name" type="text" placeholder="Название" required maxlength="20">
-                                <input id="task_1" v-model="task_1" type="text" placeholder="Задача 1 " required maxlength="20">
-                                <input id="task_2" v-model="task_2" type="text" placeholder="Задача 2" required maxlength="20">
-                                <input id="task_3" v-model="task_3" type="text" placeholder="Задача 3" required maxlength="20">
-                                <input id="task_4" v-model="task_4" type="text" placeholder="Задача 4" maxlength="20">
-                                <input id="task_5" v-model="task_5" type="text" placeholder="Задача 5" maxlength="20">
-                                <button type="submit">Создать</button>
+                                <input id="name" v-model="name" type="text" placeholder="Name task" required maxlength="20">
+                                <input id="task_1" v-model="task_1" type="text" placeholder="Task 1 " required maxlength="20">
+                                <input id="task_2" v-model="task_2" type="text" placeholder="Task 2" required maxlength="20">
+                                <input id="task_3" v-model="task_3" type="text" placeholder="Task 3" required maxlength="20">
+                                <input id="task_4" v-model="task_4" type="text" placeholder="Task 4" maxlength="20">
+                                <input id="task_5" v-model="task_5" type="text" placeholder="Task 5" maxlength="20">
+                                <button type="submit">Create</button>
                             </form>
                         </div>
                     </div>
