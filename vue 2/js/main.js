@@ -136,7 +136,7 @@ Vue.component('notes',{
                 if(this.column_1.length > 0) {
                     this.column_1.forEach(item => {
                         item.tasks.forEach(item => {
-                            item.readiness = true;
+                            item.readiness = false;
                         })
                     })
                 }
